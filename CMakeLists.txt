@@ -7,6 +7,17 @@
 
 cmake_minimum_required(VERSION 3.13)
 
+### DEBUGGING TRASH
+function(print_includes int_incl)
+  get_target_property(_incs seissol-common-properties INTERFACE_INCLUDE_DIRECTORIES)
+  message(STATUS "====lrz-debug===> INCLUDE DIRS for seissol-common-properties after ${int_incl} ====")
+  foreach(dir IN LISTS _incs)
+    message(STATUS "  ${dir}")
+  endforeach()
+  message(STATUS "<<====lrz-debug=== ==== ====")
+endfunction()
+### END DEBUGGING TRASH
+
 # use <PackageName>_ROOT variables
 if(POLICY CMP0074)
   cmake_policy(SET CMP0074 NEW)
@@ -245,6 +256,8 @@ target_compile_options(seissol-common-properties INTERFACE -fPIC)
 # enforce code generation to run before any other target
 add_dependencies(seissol-common-properties seissol-codegen)
 
+# DEBUGGING TRASH
+print_includes("At the begininning")
 target_link_libraries(seissol-lib PUBLIC seissol-common-properties)
 target_link_libraries(seissol-kernel-lib PUBLIC seissol-common-properties)
 target_link_libraries(seissol-common-lib PUBLIC seissol-common-properties)
@@ -259,6 +272,8 @@ endif()
 
 if(GemmTools_INCLUDE_DIRS)
   target_include_directories(seissol-common-properties INTERFACE ${GemmTools_INCLUDE_DIRS})
+  # DEBUGGING TRASH
+  print_includes("GemmTools_INCLUDE_DIRS")
 endif()
 if(GemmTools_LIBRARIES)
   target_link_libraries(seissol-common-properties INTERFACE ${GemmTools_LIBRARIES})
@@ -300,6 +315,8 @@ if (MPI)
   find_package(MPI REQUIRED)
 
   target_include_directories(seissol-common-properties SYSTEM INTERFACE ${MPI_CXX_INCLUDE_PATH})
+  # DEBUGGING TRASH
+  print_includes("MPI_CXX_INCLUDE_PATH")
   target_link_libraries(seissol-common-properties INTERFACE MPI::MPI_C)
 
   target_compile_definitions(seissol-common-properties INTERFACE USE_MPI PARALLEL)
@@ -328,6 +345,8 @@ endif()
 if (NETCDF)
   find_package(NetCDF REQUIRED)
   target_include_directories(seissol-common-properties INTERFACE ${NetCDF_INCLUDE_DIRS})
+  # DEBUGGING TRASH
+  print_includes("NetCDF_INCLUDE_DIRS")
   target_link_libraries(seissol-common-properties INTERFACE ${NetCDF_LIBRARY})
   target_compile_definitions(seissol-common-properties INTERFACE USE_NETCDF)
 endif()
@@ -339,10 +358,14 @@ if (HDF5)
   if (NETCDF)
     find_package(HDF5 REQUIRED COMPONENTS C HL)
     target_include_directories(seissol-common-properties INTERFACE ${HDF5_INCLUDE_DIRS})
+    # DEBUGGING TRASH
+    print_includes("HDF5_INCLUDE_DIRS__C_HL ")
     target_link_libraries(seissol-common-properties INTERFACE ${HDF5_C_HL_LIBRARIES} ${HDF5_C_LIBRARIES})
   else()
     find_package(HDF5 REQUIRED COMPONENTS C)
     target_include_directories(seissol-common-properties INTERFACE ${HDF5_INCLUDE_DIRS})
+    # DEBUGGING TRASH
+    print_includes("HDF5_INCLUDE_DIRS__C")
     target_link_libraries(seissol-common-properties INTERFACE ${HDF5_C_LIBRARIES})
   endif()
   target_compile_definitions(seissol-common-properties INTERFACE USE_HDF)
@@ -378,6 +401,8 @@ endif()
 if (MEMKIND)
   find_package(Memkind REQUIRED)
   target_include_directories(seissol-common-properties INTERFACE ${MEMKIND_INCLUDE_DIR})
+  # DEBUGGING TRASH
+  print_includes("MEMKIND_INCLUDE_DIR")
   target_link_libraries(seissol-common-properties INTERFACE ${MEMKIND_LIBRARIES})
   target_compile_definitions(seissol-common-properties INTERFACE USE_MEMKIND)
 endif()
@@ -403,6 +428,8 @@ endif()
 target_include_directories(seissol-common-properties SYSTEM INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/submodules/async
 )
+# DEBUGGING TRASH
+print_includes("${CMAKE_CURRENT_SOURCE_DIR}/submodules/async")
 
 find_package(Eigen3 REQUIRED)
 target_link_libraries(seissol-common-properties INTERFACE Eigen3::Eigen)
@@ -423,6 +450,8 @@ if((${EQUATIONS} STREQUAL "poroelastic") AND ("${Eigen3_VERSION}" VERSION_LESS "
     FortranCInterface_HEADER(FC.h MACRO_NAMESPACE "FC_")
     find_package(LAPACK REQUIRED)
     target_include_directories(seissol-common-properties INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
+    # DEBUGGING TRASH
+    print_includes("${CMAKE_CURRENT_SOURCE_DIR} adding fortan")
     target_link_libraries(seissol-common-properties INTERFACE ${LAPACK_LIBRARIES})
     target_compile_definitions(seissol-common-properties INTERFACE USE_LAPACK)
   else()
@@ -440,6 +469,8 @@ else()
   # fallback code for old versions
   if (YAML_CPP_INCLUDE_DIR AND EXISTS "${YAML_CPP_INCLUDE_DIR}")
     target_include_directories(seissol-common-properties INTERFACE ${YAML_CPP_INCLUDE_DIR})
+    # DEBUGGING TRASH
+    print_includes("YAML_CPP_INCLUDE_DIR")
   endif()
   if (YAML_CPP_LIBRARIES)
     # use the YAML_CPP_LIBRARIES, if available (though it may just say `yaml-cpp`)
@@ -461,6 +492,8 @@ target_compile_definitions(seissol-common-properties INTERFACE EIGEN_NO_CUDA)
 
 if (EIGEN3_INCLUDE_DIR)
   target_include_directories(seissol-common-properties INTERFACE ${EIGEN3_INCLUDE_DIR})
+    # DEBUGGING TRASH
+    print_includes("EIGEN3_INCLUDE_DIR")
 endif()
 
 target_include_directories(seissol-common-properties INTERFACE
@@ -470,6 +503,8 @@ target_include_directories(seissol-common-properties INTERFACE
     ${CMAKE_CURRENT_BINARY_DIR}/src/
     ${CMAKE_CURRENT_BINARY_DIR}/codegen/
 )
+# DEBUGGING TRASH
+print_includes("DIRS_FROM_CMAKE_CURRENT_SOURCE_DIR")
 
 if (PREMULTIPLY_FLUX)
   target_compile_definitions(seissol-common-properties INTERFACE USE_PREMULTIPLY_FLUX)
@@ -530,6 +565,8 @@ if (WITH_GPU)
   # add device submodule
   add_subdirectory(submodules/Device)
   target_include_directories(seissol-common-properties INTERFACE submodules/Device)
+  # DEBUGGING TRASH
+  print_includes("submodules/Device")
   target_link_libraries(seissol-common-properties INTERFACE device)
 
   # add SeisSol GPU part
@@ -716,6 +753,9 @@ if (WITH_GPU)
   install(FILES ${PROJECT_BINARY_DIR}/seissol-launch DESTINATION ${CMAKE_INSTALL_PREFIX}/share
           PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE)
 endif()
+
+# DEBUGGING TRASH
+print_includes("FINAL VERSION")
 
 # https://blog.kitware.com/static-checks-with-cmake-cdash-iwyu-clang-tidy-lwyu-cpplint-and-cppcheck/
 # https://ortogonal.github.io/cmake-clang-tidy/
